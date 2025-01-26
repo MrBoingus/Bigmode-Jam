@@ -7,10 +7,16 @@
 size = Vector2(128, 128)
 
 [node name="Player" type="CharacterBody2D"]
+collision_mask = 4
 script = ExtResource("1_y2nnv")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_unnat")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_cinx0")
+
+[node name="Gun" type="Sprite2D" parent="."]
+position = Vector2(112, 0)
+scale = Vector2(0.5625, 0.3125)
 texture = ExtResource("2_cinx0")

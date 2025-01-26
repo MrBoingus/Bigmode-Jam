@@ -18,6 +18,8 @@ var fallGravity = 100
 var state : Enums.playerStates
 var stateDuration : int
 
+var bullet = preload("res://Bullet.tscn")
+
 func _ready() -> void:
 	state = Enums.playerStates.Idle
 
@@ -29,10 +31,17 @@ func _input(event: InputEvent) -> void:
 			velocity.y -= jumpForce
 			state = Enums.playerStates.Jump
 			ChangeState()
+	
+	if event.is_action_pressed("shoot"):
+		CreateBullet()
 
 func _physics_process(delta: float) -> void:
 	input.x = Input.get_axis("left", "right")
 	
+	if input.x != 0:
+		$Sprite2D.scale.x = sign(input.x)
+		$Gun.position.x = sign(input.x) * 112 # replace with variable later
+
 	stateDuration += 1
 	
 	match state:
@@ -40,12 +49,10 @@ func _physics_process(delta: float) -> void:
 			if !is_on_floor():
 				state = Enums.playerStates.Airborne
 				ChangeState()
-				return
 				
 			if input.x != 0:
 				state = Enums.playerStates.Move
 				ChangeState()
-				return
 			else:
 				velocity.x = lerp(velocity.x, 0.0 , friction)
 				
@@ -53,7 +60,6 @@ func _physics_process(delta: float) -> void:
 			if !is_on_floor():
 				state = Enums.playerStates.Airborne
 				ChangeState()
-				return
 				
 		Enums.playerStates.Move:
 			if input.x == 0:
@@ -67,7 +73,6 @@ func _physics_process(delta: float) -> void:
 			if !is_on_floor():
 				state = Enums.playerStates.Airborne
 				ChangeState()
-				return
 				
 		Enums.playerStates.Jump:
 			if stateDuration <= earlyJumpFrames:
@@ -78,7 +83,6 @@ func _physics_process(delta: float) -> void:
 			if sign(velocity.y) >= 0:
 				state = Enums.playerStates.Airborne
 				ChangeState()
-				return
 				
 			if input.x == 0:
 				velocity.x = lerp(velocity.x, 0.0, airFriction)
@@ -100,6 +104,17 @@ func _physics_process(delta: float) -> void:
 				state = Enums.playerStates.Idle
 				ChangeState()
 				return
+			
 
 func ChangeState():
 	stateDuration = 0
+
+func CreateBullet():
+	var new : RigidBody2D = bullet.instantiate()
+	
+	owner.add_child(new)
+	
+	new.global_position = $Gun.global_position
+	
+	var force = 10000 * sign($Sprite2D.scale.x)
+	new.apply_force(Vector2(force, 0))
